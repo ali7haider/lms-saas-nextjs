@@ -1,0 +1,15 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma" // optional (you can remove this too)
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // ✅ works again in v6
+}
+
+model Test {
+  id   String @id @default(uuid())
+  test String
+}
