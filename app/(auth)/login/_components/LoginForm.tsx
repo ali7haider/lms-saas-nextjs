@@ -10,12 +10,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { Loader } from "lucide-react";
-import React, { useTransition } from "react";
+import { Loader, Loader2, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 function LoginForm() {
   const [isGitHubPending, startGitHubTransition] = useTransition();
+  const [email, setEmail] = useState("");
+  const [isEmailPending, startEmailTransition] = useTransition();
+  const router = useRouter();
 
   async function signInWithGitHub() {
     startGitHubTransition(async () => {
@@ -33,16 +37,40 @@ function LoginForm() {
       });
     });
   }
+  async function signInWithEmail() {
+    startEmailTransition(async () => {
+      await authClient.emailOtp.sendVerificationOtp({
+        email: email,
+        type: "sign-in",
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Email Send");
+            router.push("/verify-request");
+          },
+          onError: () => {
+            toast.error("Error sending code");
+          },
+        },
+      });
+    });
+  }
 
   return (
-     <Card className="py-5 px-3">
+    <Card className="py-5 px-3">
       <CardHeader>
         <CardTitle className="text-xl">Welcome Back!</CardTitle>
-        <CardDescription>Login with your GitHub or Email Account</CardDescription>
+        <CardDescription>
+          Login with your GitHub or Email Account
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <Button disabled={isGitHubPending} onClick={signInWithGitHub} variant="outline" className="w-full">
+        <Button
+          disabled={isGitHubPending}
+          onClick={signInWithGitHub}
+          variant="outline"
+          className="w-full"
+        >
           {isGitHubPending ? (
             <>
               <Loader className="size-4 animatate-spin" />
@@ -70,13 +98,29 @@ function LoginForm() {
         <div className="grid gap-3">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input type="email" placeholder="M@example.com" />
+            <Input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="M@example.com"
+              required
+            />
           </div>
-          <Button>Continue with Email</Button>
+          <Button onClick={signInWithEmail}>{isEmailPending ? (
+            <>
+            <Loader2 className="size-4 animate-spin" />
+            <span>Loading...</span>
+            </>
+          ):(
+            <>
+            <Send className="size-4" />
+            <span>Continue with Email</span>
+            </>
+          )}</Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default LoginForm
+export default LoginForm;
