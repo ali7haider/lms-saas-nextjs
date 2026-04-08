@@ -45,7 +45,7 @@ function LoginForm() {
         fetchOptions: {
           onSuccess: () => {
             toast.success("Email Send");
-            router.push("/verify-request");
+            router.push(`/verify-request?email=${email}`);
           },
           onError: () => {
             toast.error("Error sending code");
@@ -73,7 +73,7 @@ function LoginForm() {
         >
           {isGitHubPending ? (
             <>
-              <Loader className="size-4 animatate-spin" />
+              <Loader2 className="size-4 animatate-spin" />
               <span>Loading....</span>
             </>
           ) : (
